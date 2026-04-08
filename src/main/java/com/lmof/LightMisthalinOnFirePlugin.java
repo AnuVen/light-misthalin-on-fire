@@ -1,14 +1,10 @@
 package com.lmof;
 
 import com.google.inject.Provides;
-import java.util.Random;
-import java.util.Set;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Actor;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
-import net.runelite.api.NPC;
 import net.runelite.api.Scene;
 import net.runelite.api.SceneTileModel;
 import net.runelite.api.SceneTilePaint;
@@ -31,14 +27,6 @@ public class LightMisthalinOnFirePlugin extends Plugin
 	private static final int WATER_TEXTURE = 1;
 	private static final int LAVA_TEXTURE = 31;
 	private static final float FIRE_INTENSITY = 0.75f;
-	private static final Set<Integer> PANICKED_NPC_IDS = Set.of(2002, 1838, 1839);
-	private static final String[] PANICKED_LINES = {
-		"quaaaaaaaaaaaaaaaaaaack.........",
-		"QUACK QUACK! QUACK QUACK!",
-		"QUACK QUACK! QUACK QUACK quack QUACK!",
-		"QUACK! quack QUACK! quack QUACK!"
-	};
-	private final Random overheadRandom = new Random();
 
 	@Inject
 	private Client client;
@@ -52,6 +40,7 @@ public class LightMisthalinOnFirePlugin extends Plugin
 	private final FireColorMap fireColorMap;
 	private final FireSpawner fireSpawner = new FireSpawner();
 	private final TreeReplacer treeReplacer = new TreeReplacer();
+	private final NpcDialogueReplacer npcDialogueReplacer = new NpcDialogueReplacer();
 
 	{
 		fireColorMap = new FireColorMap();
@@ -101,11 +90,7 @@ public class LightMisthalinOnFirePlugin extends Plugin
 	@Subscribe
 	public void onOverheadTextChanged(OverheadTextChanged event)
 	{
-		Actor actor = event.getActor();
-		if (actor instanceof NPC && PANICKED_NPC_IDS.contains(((NPC) actor).getId()))
-		{
-			actor.setOverheadText(PANICKED_LINES[overheadRandom.nextInt(PANICKED_LINES.length)]);
-		}
+		npcDialogueReplacer.onOverheadTextChanged(event.getActor());
 	}
 
 	@Subscribe
